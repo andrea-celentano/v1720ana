@@ -11,7 +11,7 @@
 #include <JANA/JObject.h>
 #include <JANA/JFactory.h>
 
-#include <System/v1720Object.h>
+#include <system/v1720Object.h>
 
 
 class TH1D;
