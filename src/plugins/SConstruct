@@ -1,0 +1,20 @@
+from utils import *
+Import('env')
+
+plugins = getSubdirs('./')
+
+
+debugSuffix=''
+for plugin in plugins:
+	print  bcolors.OKBLUE,"Found plugin ",plugin,bcolors.ENDC
+#save the relative dir and the absolute dir
+	reldir = str(plugin)
+	absdir = Dir('#/src/plugins/'+reldir).srcnode().abspath   
+	env_plugin=env.Clone()
+	env_plugin.Append(CPPPATH=absdir) 
+#Add root dictionaries if necessary
+	AddROOTdict(env_plugin,reldir,absdir)  
+	plugin_src  = Glob(reldir+'/*.cc')
+	env_plugin.SharedLibrary(source=plugin_src,target='#/lib/plugins/'+plugin,SHLIBPREFIX='',SHLIBSUFFIX='.so')
+          
+    

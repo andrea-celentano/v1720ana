@@ -1,0 +1,18 @@
+import glob
+from utils import *
+Import('env')
+
+# Loop over libraries, building each
+libs=['system','DAQ']
+
+	
+src = []
+for lib in libs:
+	reldir = str(lib)
+	absdir = Dir('#/src/libraries/'+reldir).srcnode().abspath	
+	AddROOTdict(env,reldir,absdir)
+	src = src+Glob(lib+'/*.cc')
+
+env.SharedLibrary(source=src,target='#/lib/v1720Reco')
+
+

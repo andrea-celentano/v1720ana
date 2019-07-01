@@ -1,0 +1,15 @@
+import glob
+Import('env')
+
+# Loop over libraries, building each
+this_env=env.Clone()
+this_env.PrependUnique(LIBS="libv1720RecoExt") 
+this_env.PrependUnique(LIBS="libv1720Reco")
+this_env.PrependUnique(LIBS='JANA')
+
+
+progs=['v1720Reco']
+for prog in progs:
+    src =Glob(prog+'/*.cc')
+    this_env.Program(source=src,target='#/bin/'+prog)	
+
