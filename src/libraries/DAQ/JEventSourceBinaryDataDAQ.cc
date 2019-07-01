@@ -128,12 +128,12 @@ jerror_t JEventSourceBinaryDataDAQ::GetObjects(JEvent & event, JFactory_base * f
 			mfa250Mode1Hit->m_channel=ich;
 			for (int iSample=0;iSample<Nsamples/2;iSample++){
 				sample=(*evtData);
-				evtData++;
 				mfa250Mode1Hit->samples.push_back(sample&0xFFF);
 				mfa250Mode1Hit->samples.push_back((sample>>16)&0xFFF);
 			}
-			fac_fa250Mode1Hit->CopyTo(data);
+			data.push_back(mfa250Mode1Hit);
 		}
+		fac_fa250Mode1Hit->CopyTo(data);
 
 		return NOERROR;
 
