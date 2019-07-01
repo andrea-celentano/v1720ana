@@ -216,7 +216,6 @@ string JException::getStackTrace(bool demangle_names, size_t max_frames) {
 		if(!isMAC){
 			abi::__cxa_demangle(mangled_name.c_str(), dname, &dlen, &status);
 		}else{
-
 		}
 		string demangled_name(dname);
 		// Add demangled name or full message to output

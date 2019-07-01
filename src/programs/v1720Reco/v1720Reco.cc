@@ -12,7 +12,7 @@ using namespace jana;
 #include <system/JFactoryGenerator_system.h>
 #include <system/JEventSourceBinaryDataGenerator.h>
 #include <DAQ/JFactoryGenerator_DAQ.h>
-
+#include <system/v1720EventProcessor.h>
 
 
 
@@ -47,7 +47,11 @@ int main(int narg, char *argv[])
 	app.AddFactoryGenerator(new JFactoryGenerator_DAQ());
 	jout<<"JFactoryGenerator_DAQ DONE"<<endl;
 
+	app.AddProcessor(new v1720EventProcessor());
 	jout<<"v1720EventProcessor DONE"<<endl;
+
+
+
 	app.Run();
 
 	return 1;

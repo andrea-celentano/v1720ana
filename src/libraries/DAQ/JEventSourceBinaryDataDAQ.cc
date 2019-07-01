@@ -13,6 +13,8 @@ using namespace std;
 //DAQ
 #include <DAQ/fa250Mode1Hit.h>
 
+int countOnes(uint32_t data);
+
 // Constructor
 JEventSourceBinaryDataDAQ::JEventSourceBinaryDataDAQ(const char* source_name) :
 		JEventSource(source_name), infile(0) {
@@ -52,10 +54,14 @@ jerror_t JEventSourceBinaryDataDAQ::GetEvent(JEvent &event) {
 		//read the file
 		fread((void*)(&evtSize),4,1,infile);
 		evtSize=evtSize/4; //size of the event in number of 32-bit words
-		evtData=new uint32_t[evtSize-1];
-		fread((void*)evtData,4,evtSize-1,infile);
+		evtData=new uint32_t[evtSize];
+		uint32_t *evtDatap=evtData;
+		*evtDatap=evtSize;
+		evtDatap++;
+		fread((void*)evtDatap,4,evtSize-1,infile);
 		event.SetJEventSource(this);
 		event.SetRef((void*)evtData);
+
 		return NOERROR;
 	}
 
@@ -92,18 +98,42 @@ jerror_t JEventSourceBinaryDataDAQ::GetObjects(JEvent & event, JFactory_base * f
 
 	if (fac_fa250Mode1Hit != NULL) {
 		vector<fa250Mode1Hit*> data;
+		fa250Mode1Hit *mfa250Mode1Hit;
+		int Nch;
+		int theCh;
+		int chMask;
+		uint32_t sample;
+		uint Nsamples=(*evtData);
 
+
+		evtData++; //samples
 		evtData++; //ignore BoardID
 		evtData++; //ignore Pattern
 
-		jout<<*evtData<<endl; //ch
+		chMask=*evtData; //chMask
 		evtData++;
 
 		evtData++; //EventCounter
 		evtData++;//TriggerTimeTag
 
+		Nch=countOnes(*evtData);
+		Nsamples=(Nsamples)-6; //-6 due to event header. These are the 32-bit words with data. 1 word = 2 samples
+		Nsamples=Nsamples*2; //the TOTAL number of samples
+		Nsamples/=Nch;       //samples per channel
 
-		fac_fa250Mode1Hit->CopyTo(data);
+
+		for (int ich=0;ich<8;ich++){
+			if ((chMask>>ich &0x1)==0) continue;
+			mfa250Mode1Hit = new fa250Mode1Hit();
+			mfa250Mode1Hit->m_channel=ich;
+			for (int iSample=0;iSample<Nsamples/2;iSample++){
+				sample=(*evtData);
+				evtData++;
+				mfa250Mode1Hit->samples.push_back(sample&0xFFF);
+				mfa250Mode1Hit->samples.push_back((sample>>16)&0xFFF);
+			}
+			fac_fa250Mode1Hit->CopyTo(data);
+		}
 
 		return NOERROR;
 
@@ -112,3 +142,10 @@ jerror_t JEventSourceBinaryDataDAQ::GetObjects(JEvent & event, JFactory_base * f
 	return OBJECT_NOT_AVAILABLE;
 }
 
+int countOnes(uint32_t data){
+	int N=0;
+	for (int ii=0;ii<8;ii++){
+		if ((data>>ii)&0x1) N++;
+	}
+	return N;
+}
