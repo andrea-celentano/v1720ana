@@ -11,7 +11,7 @@ using namespace std;
 #include <JANA/JApplication.h>
 
 //DAQ
-#include <DAQ/fa250mode1Hit.h>
+#include <DAQ/fa250Mode1Hit.h>
 
 // Constructor
 JEventSourceBinaryDataDAQ::JEventSourceBinaryDataDAQ(const char* source_name) :
