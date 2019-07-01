@@ -116,11 +116,11 @@ jerror_t JEventSourceBinaryDataDAQ::GetObjects(JEvent & event, JFactory_base * f
 		evtData++; //EventCounter
 		evtData++;//TriggerTimeTag
 
-		Nch=countOnes(*evtData);
+		Nch=countOnes(chMask);
+
 		Nsamples=(Nsamples)-6; //-6 due to event header. These are the 32-bit words with data. 1 word = 2 samples
 		Nsamples=Nsamples*2; //the TOTAL number of samples
 		Nsamples/=Nch;       //samples per channel
-
 
 		for (int ich=0;ich<8;ich++){
 			if ((chMask>>ich &0x1)==0) continue;
@@ -130,6 +130,7 @@ jerror_t JEventSourceBinaryDataDAQ::GetObjects(JEvent & event, JFactory_base * f
 				sample=(*evtData);
 				mfa250Mode1Hit->samples.push_back(sample&0xFFF);
 				mfa250Mode1Hit->samples.push_back((sample>>16)&0xFFF);
+				evtData++;
 			}
 			data.push_back(mfa250Mode1Hit);
 		}

@@ -107,7 +107,13 @@ jerror_t v1720EventProcessor::evnt(JEventLoop *loop, uint64_t eventnumber) {
 	vector<const fa250Mode1Hit*> hits;
 	loop->Get(hits);
 
+	if (hits.size()>0){
+		for (int ii=0;ii<hits[0]->samples.size();ii++){
+			jout<<ii<<" "<<hits[0]->samples[ii]<<endl;
+		}
 
+		cin.get();
+	}
 	return NOERROR;
 }
 
