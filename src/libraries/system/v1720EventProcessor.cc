@@ -11,6 +11,10 @@ using namespace std;
 #include "string_utilities.h"
 //DAQ
 #include "DAQ/fa250Mode1Hit.h"
+//timing
+#include "timing/PMTHit.h"
+
+
 #include "TTree.h"
 
 #include "JOutput.h"
@@ -67,7 +71,20 @@ jerror_t v1720EventProcessor::init(void) {
 	/*Event header and runInfo are always created - as memory resident TTrees (these are quite small)*/
 	gDirectory->cd();
 	//CREATE HERE THE TTREE
+
+
+	m_tree = new TTree("tout", "tout");
+	m_tree->Branch("time0", &time0);
+	m_tree->Branch("time1",&time1);
+
+
+
+
 	japp->RootUnLock();
+
+
+
+
 
 	return NOERROR;
 }
@@ -88,7 +105,7 @@ jerror_t v1720EventProcessor::brun(JEventLoop *eventLoop, int32_t runnumber) {
 
 
 				/*If an output exists, add the eventHeader and runInfo*/
-			//	(m_ROOTOutput)->AddObject(m_eventHeader);
+				(m_ROOTOutput)->AddObject(m_tree);
 
 			}
 		}
@@ -104,16 +121,21 @@ jerror_t v1720EventProcessor::brun(JEventLoop *eventLoop, int32_t runnumber) {
 jerror_t v1720EventProcessor::evnt(JEventLoop *loop, uint64_t eventnumber) {
 
 
-	vector<const fa250Mode1Hit*> hits;
+	vector<const PMTHit*> hits;
 	loop->Get(hits);
 
-	if (hits.size()>0){
-		for (int ii=0;ii<hits[0]->samples.size();ii++){
-			jout<<ii<<" "<<hits[0]->samples[ii]<<endl;
-		}
 
-		cin.get();
+	time0.clear();
+	time1.clear();
+	for (int ii=0;ii<hits.size();ii++){
+		if (hits[ii]->m_channel==0) time0.push_back(hits[ii]->m_T0);
+		if (hits[ii]->m_channel==1) time1.push_back(hits[ii]->m_T0);
 	}
+	japp->RootWriteLock();
+	m_tree->Fill();
+	japp->RootUnLock();
+
+
 	return NOERROR;
 }
 

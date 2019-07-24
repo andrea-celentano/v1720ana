@@ -58,7 +58,9 @@ private:
 
 
 	JOutput *m_output;
+	TTree *m_tree;
 
+	vector<double> time0,time1;
 
 
 	/*Time*/

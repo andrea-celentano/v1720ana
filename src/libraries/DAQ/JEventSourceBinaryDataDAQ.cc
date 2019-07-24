@@ -52,20 +52,24 @@ jerror_t JEventSourceBinaryDataDAQ::GetEvent(JEvent &event) {
 		return NO_MORE_EVENTS_IN_SOURCE;
 	} else {
 		//read the file
-		fread((void*)(&evtSize),4,1,infile);
-		evtSize=evtSize/4; //size of the event in number of 32-bit words
-		evtData=new uint32_t[evtSize];
-		uint32_t *evtDatap=evtData;
-		*evtDatap=evtSize;
+		fread((void*) (&evtSize), 4, 1, infile);
+		evtSize = evtSize / 4; //size of the event in number of 32-bit words
+		evtData = new uint32_t[evtSize];
+		uint32_t *evtDatap = evtData;
+		*evtDatap = evtSize;
 		evtDatap++;
-		fread((void*)evtDatap,4,evtSize-1,infile);
+		fread((void*) evtDatap, 4, evtSize - 1, infile);
 		event.SetJEventSource(this);
-		event.SetRef((void*)evtData);
+		event.SetRef((void*) evtData);
+
+		if (feof(infile)) {
+			jout << "End of file" << endl;
+			fclose(infile);
+			return NO_MORE_EVENTS_IN_SOURCE;
+		}
 
 		return NOERROR;
 	}
-
-
 
 }
 
@@ -94,7 +98,7 @@ jerror_t JEventSourceBinaryDataDAQ::GetObjects(JEvent & event, JFactory_base * f
 
 	//JFactory<eventData> *fac_eventData = dynamic_cast<JFactory<eventData>*>(factory);
 
-	uint32_t *evtData=(uint32_t*)event.GetRef();
+	uint32_t *evtData = (uint32_t*) event.GetRef();
 
 	if (fac_fa250Mode1Hit != NULL) {
 		vector<fa250Mode1Hit*> data;
@@ -103,33 +107,34 @@ jerror_t JEventSourceBinaryDataDAQ::GetObjects(JEvent & event, JFactory_base * f
 		int theCh;
 		int chMask;
 		uint32_t sample;
-		uint Nsamples=(*evtData);
 
+		uint32_t Nsamples = (*evtData); //event size (32-bit words)
+		evtData++;
 
-		evtData++; //samples
 		evtData++; //ignore BoardID
 		evtData++; //ignore Pattern
 
-		chMask=*evtData; //chMask
+		chMask = *evtData; //chMask
 		evtData++;
 
 		evtData++; //EventCounter
-		evtData++;//TriggerTimeTag
+		evtData++; //TriggerTimeTag
 
-		Nch=countOnes(chMask);
+		Nch = countOnes(chMask);
 
-		Nsamples=(Nsamples)-6; //-6 due to event header. These are the 32-bit words with data. 1 word = 2 samples
-		Nsamples=Nsamples*2; //the TOTAL number of samples
-		Nsamples/=Nch;       //samples per channel
+		Nsamples = (Nsamples) - 6; //-6 due to event header. These are the 32-bit words with data. 1 word = 2 samples
 
-		for (int ich=0;ich<8;ich++){
-			if ((chMask>>ich &0x1)==0) continue;
+		Nsamples = Nsamples * 2; //the TOTAL number of samples
+		Nsamples /= Nch;       //samples per channel
+
+		for (int ich = 0; ich < 8; ich++) {
+			if ((chMask >> ich & 0x1) == 0) continue;
 			mfa250Mode1Hit = new fa250Mode1Hit();
-			mfa250Mode1Hit->m_channel=ich;
-			for (int iSample=0;iSample<Nsamples/2;iSample++){
-				sample=(*evtData);
-				mfa250Mode1Hit->samples.push_back(sample&0xFFF);
-				mfa250Mode1Hit->samples.push_back((sample>>16)&0xFFF);
+			mfa250Mode1Hit->m_channel = ich;
+			for (int iSample = 0; iSample < Nsamples / 2; iSample++) {
+				sample = (*evtData);
+				mfa250Mode1Hit->samples.push_back(sample & 0xFFF);
+				mfa250Mode1Hit->samples.push_back((sample >> 16) & 0xFFF);
 				evtData++;
 			}
 			data.push_back(mfa250Mode1Hit);
@@ -143,10 +148,10 @@ jerror_t JEventSourceBinaryDataDAQ::GetObjects(JEvent & event, JFactory_base * f
 	return OBJECT_NOT_AVAILABLE;
 }
 
-int countOnes(uint32_t data){
-	int N=0;
-	for (int ii=0;ii<8;ii++){
-		if ((data>>ii)&0x1) N++;
+int countOnes(uint32_t data) {
+	int N = 0;
+	for (int ii = 0; ii < 8; ii++) {
+		if ((data >> ii) & 0x1) N++;
 	}
 	return N;
 }

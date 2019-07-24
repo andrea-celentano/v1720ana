@@ -1,0 +1,18 @@
+#Number of samples to consider in the waveform to do a ped. subtraction
+FA250MODE1CALIBPEDSUB::PEDSAMPLES 20
+
+#                                                     ___
+#Polarity for the thresholds below. 0 is positive: __|   |___________
+#
+#	      	  	     	    1 is negative: __     ___________
+#						     |___|
+PMTHIT::POLARITY 1
+
+#Thresholds to define a hit, in mV. Positive values, polarity is before
+PMTHIT::THR0 50
+PMTHIT::THR1 50
+
+#Samples to save before the thr and after the thr
+PMTHIT::PREHIT 20
+PMTHIT::POSTHIT 50
+

@@ -12,7 +12,7 @@
 #include <JANA/JFactoryGenerator.h>
 
 #include "fa250Mode1Hit.h"
-
+#include "fa250Mode1CalibPedSubHit_factory.h"
 
 class JFactoryGenerator_DAQ: public jana::JFactoryGenerator {
 public:
@@ -30,7 +30,7 @@ public:
 	jerror_t GenerateFactories(jana::JEventLoop *loop) {
 
 		loop->AddFactory(new JFactory<fa250Mode1Hit>());
-
+		loop->AddFactory(new fa250Mode1CalibPedSubHit_factory());
 
 		return NOERROR;
 	}

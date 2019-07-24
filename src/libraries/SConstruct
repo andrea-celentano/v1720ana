@@ -3,7 +3,7 @@ from utils import *
 Import('env')
 
 # Loop over libraries, building each
-libs=['system','DAQ']
+libs=['timing','system','DAQ']
 
 	
 src = []
