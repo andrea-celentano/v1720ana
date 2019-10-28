@@ -113,7 +113,19 @@ jerror_t JEventProcessor_monitoring::init(void) {
 	m_histoMonitor2 = new TH1D("m_histoMonitor2", "m_histoMonitor2", int((Tmax - Tmin) / dT), Tmin, Tmax);
 	c_Monitor = new TCanvas("cMonitor", "cMonitor", 800, 800);
 	c_Monitor2 = new TCanvas("cMonitor2", "cMonitor2", 800, 800);
-	c_Monitor2->Divide(3,3);
+
+	if (integralPlots.size()==1){
+	  c_Monitor2->Divide(1,1);
+	}
+	else if (integralPlots.size()==2){
+	  c_Monitor2->Divide(2,1);
+	} 
+	else if (integralPlots.size()<=4){
+	  c_Monitor2->Divide(2,2);
+	}
+	else if (integralPlots.size()<=9){
+	  c_Monitor2->Divide(3,3);
+	}
 	japp->RootUnLock();
 
 	return NOERROR;
