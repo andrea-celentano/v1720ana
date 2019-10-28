@@ -16,3 +16,31 @@ PMTHIT::THR1 50
 PMTHIT::PREHIT 20
 PMTHIT::POSTHIT 50
 
+
+#Monitoring
+
+##The update time in s
+MONITOR::UPDATE_TIME 2
+
+##The main histogram
+MONITOR::TMIN  1000
+MONITOR::TMAX  20000
+MONITOR::DT    4
+MONITOR::LOG   1
+
+###############################
+# DO NOT TOUCH THE COMMENT    #
+# MONITOR_INTEGRALS           #
+# The individual integrals    # 
+# Each line is a new integral #
+# Between TMIN and TMAX       #
+# Syntax: INTEGRAL TMIN TMAX  #
+# TMIN AND TMAX in ns
+# Example: INTEGRAL 20 200    #
+# Means integrate between 20  #
+# and 200 ns                  #
+###############################
+
+INTEGRAL 0 2000
+INTEGRAL 0 1000
+INTEGRAL 1000 2000
