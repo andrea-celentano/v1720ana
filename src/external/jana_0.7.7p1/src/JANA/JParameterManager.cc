@@ -133,6 +133,8 @@ void JParameterManager::ReadConfigFile(string fname)
 	///
 	/// Lines with no characters (except for the newline) are ignored.
 
+	configFile=fname;
+
 	// Try and open file
 	ifstream ifs(fname.c_str());
 	if(!ifs.is_open()){

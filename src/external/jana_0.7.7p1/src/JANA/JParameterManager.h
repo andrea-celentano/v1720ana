@@ -72,11 +72,15 @@ public:
 		this->verbose = verbose;
 	} ///< Turn on additional messages
 
+
+	string GetConfigFileName(){return configFile;}
+
 private:
 	vector<JParameter*> parameters;
 	pthread_mutex_t parameter_mutex;
 	bool printParametersCalled;
 	bool verbose;
+	string configFile;
 };
 
 //---------------------------------
