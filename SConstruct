@@ -41,7 +41,8 @@ env.Replace(RPATH=Dir('#/lib').srcnode().abspath)
 
 #This drove me crazy! jlab_software jana was including this, and we need it for sophisticated rootspy features..
 env.Append(LINKFLAGS = '-rdynamic')
-
+env.Append(LINKFLAGS = '-lSpectrum')
+env.Append(CXXFLAGS = '-g')
 Export('env')
 
 libExt=SConscript('src/external/SConstruct')
