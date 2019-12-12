@@ -73,10 +73,11 @@ jerror_t PMTHit_factory::evnt(JEventLoop *loop, uint64_t eventnumber) {
 		m_fa250Mode1Hit = m_fa250Mode1Hits[ii];
 		m_channel = m_fa250Mode1Hit->m_channel;
 		count=0;
+
 		//Loop over the samples and determine the Hits
 		for (jj = 0; jj < m_fa250Mode1Hit->samples.size(); jj++) {
 			if (((m_polarity == 0) && (m_fa250Mode1Hit->samples[jj] > m_THR[m_channel])) || ((m_polarity == 1) && (m_fa250Mode1Hit->samples[jj] < -m_THR[m_channel]))) {
-
+				ampl=99999;
 				mPMTHit = new PMTHit();
 				mPMTHit->m_LSB = m_fa250Mode1Hit->m_LSB;
 				mPMTHit->m_preT = m_preHit*m_fa250Mode1Hit->m_dT;

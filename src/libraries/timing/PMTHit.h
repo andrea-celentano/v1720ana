@@ -29,6 +29,7 @@ public:
 	void toStrings(vector<pair<string, string> > &items) const {
 		AddString(items, "channel", "%4d", m_channel);
 		AddString(items, "T0", "%f", m_T0);
+		AddString(items, "A", "%f", m_A);
 
 	}
 
