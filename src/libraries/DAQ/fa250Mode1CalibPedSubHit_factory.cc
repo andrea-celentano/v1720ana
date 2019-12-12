@@ -80,6 +80,7 @@ jerror_t fa250Mode1CalibPedSubHit_factory::evnt(JEventLoop *loop, uint64_t event
 
 		CalibPedSubHit->m_channel = hit->m_channel;
 		CalibPedSubHit->m_dT = m_dT;
+		CalibPedSubHit->m_LSB = m_LSB;
 		CalibPedSubHit->m_ped = m_ped * m_LSB;
 
 		// Add original as associated object 

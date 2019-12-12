@@ -276,7 +276,7 @@ JFactory<T>* JEventLoop::Get(vector<const T*> &t, const char *tag, bool allow_de
 		if(iter!=default_tags.end())tag = iter->second.c_str();
 	}
 	
-	
+
 	// If we are trying to keep track of the call stack then we
 	// need to add a new call_stack_t object to the the list
 	// and initialize it with the start time and caller/callee
@@ -338,6 +338,7 @@ JFactory<T>* JEventLoop::Get(vector<const T*> &t, const char *tag, bool allow_de
 			}
 		}
 	}catch(exception &e){
+		jout<<"JEventLoop.h exception: "<<e.what()<<std::endl;fflush(stdout);
 		// Uh-oh, an exception was thrown. Add us to the call stack
 		// and re-throw the exception
 		error_call_stack_t ecs;

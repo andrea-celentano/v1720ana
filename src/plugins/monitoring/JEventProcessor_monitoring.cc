@@ -43,8 +43,9 @@ JEventProcessor_monitoring::JEventProcessor_monitoring() {
 	dT = 4;
 	log = 0;
 	updateTime = 10;
-	startTime = 0;
-	thisTime = 0;
+
+
+
 
 	gPARMS->SetDefaultParameter("MONITOR::TMIN", Tmin);
 	gPARMS->SetDefaultParameter("MONITOR::TMAX", Tmax);
@@ -57,6 +58,8 @@ JEventProcessor_monitoring::JEventProcessor_monitoring() {
 	m_histoMonitor2 = 0;
 	c_Monitor = 0;
 	c_Monitor2 = 0;
+
+	jout<<"MONITOR PARMS: "<<Tmin<<" "<<Tmax<<" "<<dT<<" "<<log<<" "<<updateTime<<endl;
 
 	counter=0;
 }
@@ -128,6 +131,7 @@ jerror_t JEventProcessor_monitoring::init(void) {
 	}
 	japp->RootUnLock();
 
+	nevt=0;
 	return NOERROR;
 }
 
@@ -137,7 +141,9 @@ jerror_t JEventProcessor_monitoring::init(void) {
 jerror_t JEventProcessor_monitoring::brun(JEventLoop *eventLoop, uint32_t runnumber) {
 	// This is called whenever the run number changes
 
-	startTime = clock();
+
+	gettimeofday(&startTime, NULL);
+
 	return NOERROR;
 }
 
@@ -165,24 +171,31 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 	double intTmin,intTmax,val;
 	loop->Get(pmtHits);
 
+	if (pmtHits.size()==0) return NOERROR;
+
+	nevt++;
+
 	for (pmtHits_it = pmtHits.begin(); pmtHits_it != pmtHits.end(); pmtHits_it++) {
 		pmtHit = *pmtHits_it;
-		japp->RootWriteLock();
+
 		m_histoMonitor->Fill(pmtHit->m_T0);
 		m_histoMonitor2->Fill(pmtHit->m_T0);
-		japp->RootUnLock();
+
 	}
+	gettimeofday(&thisTime, NULL);
 
-	thisTime = clock();
 
-	if (((thisTime - startTime) / CLOCKS_PER_SEC) > updateTime) {
+	double deltaTime =(thisTime.tv_sec-startTime.tv_sec);
+	if (deltaTime >= updateTime) {
 		startTime = thisTime;
+
+		if (nevt==0) return NOERROR;
 
 		for (int ii=0;ii<integralTimes.size();ii++){
 			intTmin=integralTimes[ii].first;
 			intTmax=integralTimes[ii].second;
 			val=m_histoMonitor2->Integral(m_histoMonitor2->FindBin(intTmin),m_histoMonitor2->FindBin(intTmax));
-			integralPlots[ii]->SetPoint(counter,counter*updateTime,val);
+			integralPlots[ii]->SetPoint(counter,counter*updateTime,val/nevt);
 		}
 
 		counter++;
@@ -191,7 +204,7 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 
 
 
-		japp->RootWriteLock();
+
 		c_Monitor->cd();
 		if (log) {
 			c_Monitor->SetLogy();
@@ -207,7 +220,9 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 		c_Monitor2->Modified();
 		c_Monitor2->Update();
 		m_histoMonitor2->Reset();
-		japp->RootUnLock();
+
+
+		nevt=0;
 	}
 
 	return NOERROR;

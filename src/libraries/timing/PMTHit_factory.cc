@@ -67,6 +67,7 @@ jerror_t PMTHit_factory::evnt(JEventLoop *loop, uint64_t eventnumber) {
 	PMTHit *mPMTHit;
 	int ii, jj, kk;
 	int count=0;
+	double ampl=99999;
 	//Loop over the fa250Mode1Hits
 	for (ii = 0; ii < m_fa250Mode1Hits.size(); ii++) {
 		m_fa250Mode1Hit = m_fa250Mode1Hits[ii];
@@ -77,6 +78,8 @@ jerror_t PMTHit_factory::evnt(JEventLoop *loop, uint64_t eventnumber) {
 			if (((m_polarity == 0) && (m_fa250Mode1Hit->samples[jj] > m_THR[m_channel])) || ((m_polarity == 1) && (m_fa250Mode1Hit->samples[jj] < -m_THR[m_channel]))) {
 
 				mPMTHit = new PMTHit();
+				mPMTHit->m_LSB = m_fa250Mode1Hit->m_LSB;
+				mPMTHit->m_preT = m_preHit*m_fa250Mode1Hit->m_dT;
 				mPMTHit->m_channel = m_channel;
 				mPMTHit->m_T0 = jj * m_fa250Mode1Hit->m_dT;
 				mPMTHit->m_dT = m_fa250Mode1Hit->m_dT;
@@ -84,13 +87,14 @@ jerror_t PMTHit_factory::evnt(JEventLoop *loop, uint64_t eventnumber) {
 				/*Save the pre-samples*/
 				for (kk = jj - m_preHit; kk < jj; kk++) {
 					if (kk < 0) continue;
-					mPMTHit->m_samples.push_back(m_fa250Mode1Hit->samples[kk]);
+					mPMTHit->m_samples.push_back(-m_fa250Mode1Hit->samples[kk]);
 				}
 
 				/*Save all the samples before the new thr crossing*/
 				kk = jj;
 				while (1) {
-					mPMTHit->m_samples.push_back(m_fa250Mode1Hit->samples[kk]);
+					if (m_fa250Mode1Hit->samples[kk]<ampl) ampl=m_fa250Mode1Hit->samples[kk];
+					mPMTHit->m_samples.push_back(-m_fa250Mode1Hit->samples[kk]);
 					if (kk >= m_fa250Mode1Hit->samples.size()) break;
 					kk++;
 					if (((m_polarity == 0) && (m_fa250Mode1Hit->samples[kk] < m_THR[m_channel])) || ((m_polarity == 1) && (m_fa250Mode1Hit->samples[kk] > -m_THR[m_channel]))) break;
@@ -99,14 +103,13 @@ jerror_t PMTHit_factory::evnt(JEventLoop *loop, uint64_t eventnumber) {
 				/*Save the post-samples*/
 				for (kk = jj; kk < jj+m_preHit; kk++) {
 					if (kk >= m_fa250Mode1Hit->samples.size()) continue;
-					mPMTHit->m_samples.push_back(m_fa250Mode1Hit->samples[kk]);
+					mPMTHit->m_samples.push_back(-m_fa250Mode1Hit->samples[kk]);
 				}
 				jj = kk+1;
-
+				mPMTHit->m_A=-ampl;
 				_data.push_back(mPMTHit);
 			}
 		}
-
 	}
 
 // Code to generate factory data goes here. Add it like:

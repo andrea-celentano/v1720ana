@@ -23,8 +23,7 @@ using namespace std;
 class TranslationTable;
 class JOutput;
 class TTree;
-class CataniaEventProto2;
-class TEvent;
+
 
 /*This class is the "main" event processor, that gets called in any case,
  * also if we use users plugins
@@ -46,7 +45,7 @@ public:
 
 private:
 	jerror_t init();                                 // Called once at program start.
-	jerror_t brun(JEventLoop*, int32_t runnumber);       // Called everytime a new run number is detected.
+	jerror_t brun(JEventLoop*, uint32_t runnumber);       // Called everytime a new run number is detected.
 	jerror_t evnt(JEventLoop*, uint64_t eventnumber);     // Called every event.
 	jerror_t erun();                                 // Called everytime run number changes, provided brun has been called.
 	jerror_t fini();                                 // Called after last event of last event source has been processed.
@@ -61,7 +60,8 @@ private:
 	TTree *m_tree;
 
 	vector<double> time0,time1;
-
+	vector<double> ampl0;
+	double Ttrg;
 
 	/*Time*/
 	Long64_t startTime, stopTime, deltaTime;

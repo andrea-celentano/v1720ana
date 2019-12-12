@@ -24,12 +24,16 @@ JEventSourceBinaryDataDAQ::JEventSourceBinaryDataDAQ(const char* source_name) :
 	jout << "Opening file: " << source_name << endl;
 
 	//TODO: check if file exists
-
-	if ((infile = fopen(source_name, "rb")) == NULL) {
+	infile.open(source_name, ios::binary);
+	if (!infile) {
 		jout << "Error opening file";
 		exit(1);
 	}
-	//currEventTimeSlice = 0;
+
+//currEventTimeSlice = 0;
+	flagEnd = 0;
+	infilePos = 0;
+
 	jout << "JEventSourceBinaryDataDAQ creator DONE: " << this << endl;
 
 }
@@ -46,32 +50,68 @@ jerror_t JEventSourceBinaryDataDAQ::GetEvent(JEvent &event) {
 	event.SetRef(NULL);
 	uint32_t evtSize; //size of the event in number of bytes
 	uint32_t *evtData;
-	if (feof(infile)) {
-		jout << "End of file" << endl;
-		fclose(infile);
-		return NO_MORE_EVENTS_IN_SOURCE;
-	} else {
-		//read the file
-		fread((void*) (&evtSize), 4, 1, infile);
-		evtSize = evtSize / 4; //size of the event in number of 32-bit words
-		evtData = new uint32_t[evtSize];
-		uint32_t *evtDatap = evtData;
-		*evtDatap = evtSize;
-		evtDatap++;
-		fread((void*) evtDatap, 4, evtSize - 1, infile);
-		event.SetJEventSource(this);
-		event.SetRef((void*) evtData);
 
-		if (feof(infile)) {
-			jout << "End of file" << endl;
-			fclose(infile);
+	//read the file
+	//set the file position before reading
+	infilePos = infile.tellg();
+	//read the event size
+	evtSize = 0;
+	infile.read((char*) (&evtSize), 4);
+
+	//check if it was read properly
+	if (infile.eof() || infile.fail()) {
+		infile.clear();
+		if (flagEnd == 0) {
+			usleep(100000);
+			flagEnd++;
+			infile.seekg(infilePos);
+			event.SetJEventSource(this);
+			event.SetRef(NULL);
+			return NOERROR;
+		} else {
+			event.SetJEventSource(this);
+			event.SetRef(NULL);
 			return NO_MORE_EVENTS_IN_SOURCE;
 		}
-
-		return NOERROR;
 	}
 
+	evtSize = evtSize / 4; //size of the event in number of 32-bit words
+
+	//prepare the buffer
+	evtData = new uint32_t[evtSize];
+	uint32_t *evtDatap = evtData;
+
+	//save the event size to the first buffer word
+	*evtDatap = evtSize;
+	evtDatap++;
+
+	//try read the data. If the operation fails due to EOF, repeat
+	infile.read((char*) evtDatap, 4 * (evtSize - 1));
+
+	if (infile.eof() || infile.fail()) {
+		infile.clear();
+		if (flagEnd == 0) {
+			usleep(100000);
+			flagEnd++;
+			infile.seekg(infilePos);
+			event.SetJEventSource(this);
+			event.SetRef(NULL);
+			return NOERROR;
+		} else {
+			event.SetJEventSource(this);
+			event.SetRef(NULL);
+			return NO_MORE_EVENTS_IN_SOURCE;
+		}
+	}
+
+	event.SetJEventSource(this);
+	event.SetRef((void*) evtData);
+	flagEnd = 0;
+	return NOERROR;
 }
+
+
+
 
 // FreeEvent
 void JEventSourceBinaryDataDAQ::FreeEvent(JEvent &event) {
@@ -96,11 +136,15 @@ jerror_t JEventSourceBinaryDataDAQ::GetObjects(JEvent & event, JFactory_base * f
 //As suggested by David, do a check on the factory type to decide what to do
 	JFactory<fa250Mode1Hit> *fac_fa250Mode1Hit = dynamic_cast<JFactory<fa250Mode1Hit>*>(factory);
 
-	//JFactory<eventData> *fac_eventData = dynamic_cast<JFactory<eventData>*>(factory);
+//JFactory<eventData> *fac_eventData = dynamic_cast<JFactory<eventData>*>(factory);
 
 	uint32_t *evtData = (uint32_t*) event.GetRef();
 
 	if (fac_fa250Mode1Hit != NULL) {
+		if (event.GetRef() == NULL) {
+			return NOERROR;
+		}
+
 		vector<fa250Mode1Hit*> data;
 		fa250Mode1Hit *mfa250Mode1Hit;
 		int Nch;
@@ -126,6 +170,7 @@ jerror_t JEventSourceBinaryDataDAQ::GetObjects(JEvent & event, JFactory_base * f
 
 		Nsamples = Nsamples * 2; //the TOTAL number of samples
 		Nsamples /= Nch;       //samples per channel
+
 
 		for (int ich = 0; ich < 8; ich++) {
 			if ((chMask >> ich & 0x1) == 0) continue;

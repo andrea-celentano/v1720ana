@@ -635,6 +635,7 @@ jerror_t JEventLoop::OneEvent(void)
 		try{
 			proc->evnt(this, event_number);
 		}catch(exception &e){
+			jout<<"JEventLoop Exception on proc: "<<proc->className()<<endl;fflush(stdout);
 			error_call_stack_t cs = {"JEventLoop", "OneEvent  (evnt)", __FILE__, __LINE__};
 			error_call_stack.push_back(cs);
 			PrintErrorCallStack();

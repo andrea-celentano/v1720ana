@@ -36,8 +36,11 @@ public:
 	int m_id; //counting each per channel
 	vector<double> m_samples;
 	double m_T0;
+	double m_preT;
 	double m_dT;
+	double m_LSB;
 
+	double m_A;
 
 	void toHisto(TH1D *h) const;
 	virtual TCanvas* Draw(int id = 0) const;

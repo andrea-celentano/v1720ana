@@ -12,6 +12,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <sys/time.h>
 
 class TH1D;
 class TCanvas;
@@ -41,8 +42,12 @@ class JEventProcessor_monitoring:public jana::JEventProcessor{
 		TH1D* m_histoMonitor2;
 		TCanvas* c_Monitor;
 		TCanvas* c_Monitor2;
-		clock_t startTime,thisTime;
 
+		struct timeval startTime,thisTime;
+
+
+
+		int nevt;
 		vector<std::pair<double,double>> integralTimes;
 		vector<TGraph *> integralPlots;
 

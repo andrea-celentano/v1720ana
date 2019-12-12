@@ -13,7 +13,7 @@ using namespace std;
 #include "DAQ/fa250Mode1Hit.h"
 //timing
 #include "timing/PMTHit.h"
-
+#include "timing/TriggerHit.h"
 
 #include "TTree.h"
 
@@ -75,8 +75,9 @@ jerror_t v1720EventProcessor::init(void) {
 
 	m_tree = new TTree("tout", "tout");
 	m_tree->Branch("time0", &time0);
+	m_tree->Branch("ampl0", &ampl0);
 	m_tree->Branch("time1",&time1);
-
+	m_tree->Branch("Ttrg",&Ttrg);
 
 
 
@@ -90,7 +91,7 @@ jerror_t v1720EventProcessor::init(void) {
 }
 
 // brun
-jerror_t v1720EventProcessor::brun(JEventLoop *eventLoop, int32_t runnumber) {
+jerror_t v1720EventProcessor::brun(JEventLoop *eventLoop, uint32_t runnumber) {
 
 	bout << "v1720EventProcessor::brun " << runnumber << "(isFirstCallToBrun: " << isFirstCallToBrun << " m_output: " << m_output << ")" << endl;
 
@@ -122,15 +123,34 @@ jerror_t v1720EventProcessor::evnt(JEventLoop *loop, uint64_t eventnumber) {
 
 
 	vector<const PMTHit*> hits;
+	vector<const TriggerHit*> thits;
+
+
 	loop->Get(hits);
 
+	//loop->Get(thits);
 
+	if (hits.size()==0){
+		return NOERROR;
+	}
+
+//	if (thits.size()!=1){
+//		jerr<<"Error on event: "<<eventnumber<<" number of trigger hits: "<<thits.size()<<endl;
+//		return VALUE_OUT_OF_RANGE;
+	//}
+
+	ampl0.clear();
 	time0.clear();
 	time1.clear();
 	for (int ii=0;ii<hits.size();ii++){
-		if (hits[ii]->m_channel==0) time0.push_back(hits[ii]->m_T0);
+		if (hits[ii]->m_channel==0){
+			ampl0.push_back(hits[ii]->m_A);
+			time0.push_back(hits[ii]->m_T0);
+		}
 		if (hits[ii]->m_channel==1) time1.push_back(hits[ii]->m_T0);
 	}
+//	Ttrg=thits[0]->m_T0;
+
 	japp->RootWriteLock();
 	m_tree->Fill();
 	japp->RootUnLock();

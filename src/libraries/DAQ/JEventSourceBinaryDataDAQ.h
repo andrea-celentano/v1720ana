@@ -11,6 +11,8 @@
 // JANA headers
 #include <JANA/JEventSource.h>
 #include <JANA/jerror.h>
+#include <iostream>
+#include <fstream>
 using namespace jana;
 //BinaryData headers
 
@@ -46,9 +48,10 @@ public:
 
 private:
 
-	FILE* infile;
+	std::ifstream infile;
+	int flagEnd;
+	std::streampos infilePos;
 
-//	struct
 
 
 };

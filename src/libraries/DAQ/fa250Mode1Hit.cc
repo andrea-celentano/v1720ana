@@ -28,7 +28,7 @@ TCanvas* fa250Mode1Hit::Draw(int id) const {
 	if (hWave!=0) delete hWave;
 	hWave=new TH1D(Form("h%i",m_channel),Form("h%i_%i_%i",m_channel),this->samples.size(),-0.5,this->samples.size()-0.5);
 	this->toHisto(hWave);
-	hWave->Draw();
+	hWave->Draw("HIST");
 	return m_canvas;
 }
 
@@ -42,7 +42,7 @@ void fa250Mode1Hit::toHisto(TH1D *h)const {
 		h->Fill(ii,this->samples[ii]);
 	}
 	for (int ii=0;ii<=h->GetNbinsX();ii++) {
-		h->SetBinError(ii,0.);
+		h->SetBinError(ii,1.);
 	}
 	return;
 }

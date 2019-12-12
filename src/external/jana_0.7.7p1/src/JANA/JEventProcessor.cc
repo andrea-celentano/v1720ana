@@ -45,7 +45,7 @@ jerror_t JEventProcessor::init(void)
 //----------------
 // brun
 //----------------
-jerror_t JEventProcessor::brun(JEventLoop *loop, int32_t runnumber)
+jerror_t JEventProcessor::brun(JEventLoop *loop, uint32_t runnumber)
 {
 	return NOERROR;
 }

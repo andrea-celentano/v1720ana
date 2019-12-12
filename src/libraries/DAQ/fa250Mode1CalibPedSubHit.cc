@@ -26,7 +26,7 @@ TCanvas* fa250Mode1CalibPedSubHit::Draw(int id) const{
 	if (hWave!=0) delete hWave;
 	hWave=new TH1D(Form("hh%i",m_channel),Form("h%i",m_channel),this->samples.size(),-0.5*m_dT,(this->samples.size()-0.5)*m_dT);
 	this->toHisto(hWave);
-	hWave->Draw();
+	hWave->Draw("HIST");
 	return m_canvas;
 }
 
@@ -41,7 +41,7 @@ void fa250Mode1CalibPedSubHit::toHisto(TH1D *h)const{
 		h->Fill(ii*m_dT,this->samples[ii]);
 	}
 	for (int ii=0;ii<=h->GetNbinsX();ii++){
-		h->SetBinError(ii,0.);
+		h->SetBinError(ii,this->m_LSB);
 	}
 	return;
 }

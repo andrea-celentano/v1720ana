@@ -26,9 +26,9 @@ TCanvas* PMTHit::Draw(int id) const {
 	m_canvas->cd();
 
 	if (hWave!=0) delete hWave;
-	hWave=new TH1D(Form("h%i_%i",m_channel,m_id),Form("h%i_%i",m_channel,m_id),this->m_samples.size(),-0.5*m_dT+m_T0,(this->m_samples.size()-0.5)*m_dT+m_T0);
+	hWave=new TH1D(Form("h%i_%i",m_channel,m_id),Form("h%i_%i",m_channel,m_id),this->m_samples.size(),-0.5*m_dT+m_T0-m_preT,(this->m_samples.size()-0.5)*m_dT+m_T0-m_preT);
 	this->toHisto(hWave);
-	hWave->Draw();
+	hWave->Draw("HIST");
 	return m_canvas;
 }
 
@@ -39,10 +39,10 @@ void PMTHit::toHisto(TH1D *h)const {
 	int N=this->m_samples.size();
 	h->Reset();
 	for (int ii=0;ii<N;ii++) {
-		h->Fill(ii*m_dT+m_T0,this->m_samples[ii]);
+		h->Fill(ii*m_dT+m_T0-m_preT,this->m_samples[ii]);
 	}
 	for (int ii=0;ii<=h->GetNbinsX();ii++) {
-		h->SetBinError(ii,0.);
+		h->SetBinError(ii,m_LSB);
 	}
 	return;
 }
