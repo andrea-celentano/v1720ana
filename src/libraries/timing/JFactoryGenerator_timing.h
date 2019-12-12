@@ -11,7 +11,9 @@
 #include <JANA/jerror.h>
 #include <JANA/JFactoryGenerator.h>
 #include "PMTHit_factory.h"
-
+#include "TriggerHit_factory.h"
+#include "PedestalHit_factory.h"
+#include "PMTTimeFit_factory.h"
 
 class JFactoryGenerator_timing: public jana::JFactoryGenerator {
 public:
@@ -29,7 +31,9 @@ public:
 	jerror_t GenerateFactories(jana::JEventLoop *loop) {
 
 		loop->AddFactory(new PMTHit_factory());
-
+		loop->AddFactory(new TriggerHit_factory());
+		loop->AddFactory(new PedestalHit_factory());
+		loop->AddFactory(new PMTTimeFit_factory());
 		return NOERROR;
 	}
 
