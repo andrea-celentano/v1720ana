@@ -14,6 +14,8 @@ from SCons.Script import *
 opts = Variables()
 cmloptions(opts)
 env = Environment(tools=['default'], options = opts, ENV = os.environ)
+
+
 from loadroot import loadroot
 loadroot(env)
 from loadxerces import loadxerces
@@ -41,8 +43,9 @@ env.Replace(RPATH=Dir('#/lib').srcnode().abspath)
 
 #This drove me crazy! jlab_software jana was including this, and we need it for sophisticated rootspy features..
 env.Append(LINKFLAGS = '-rdynamic')
-env.Append(LINKFLAGS = '-lSpectrum')
+env.Append(LIBS = 'Spectrum')
 env.Append(CXXFLAGS = '-g')
+
 Export('env')
 
 libExt=SConscript('src/external/SConstruct')
@@ -51,7 +54,7 @@ progs=SConscript('src/programs/SConstruct')
 plugins=SConscript('src/plugins/SConstruct')
 
 
-
+print env.Dump()
 
 
 
