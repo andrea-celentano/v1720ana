@@ -103,6 +103,7 @@ jerror_t PMTHit_factory::evnt(JEventLoop *loop, uint64_t eventnumber) {
 				jj = kk + 1;
 				/*Save the post-samples*/
 				for (kk = jj; kk < jj+m_preHit; kk++) {
+				  	if (m_fa250Mode1Hit->samples[kk]<ampl) ampl=m_fa250Mode1Hit->samples[kk];
 					if (kk >= m_fa250Mode1Hit->samples.size()) continue;
 					mPMTHit->m_samples.push_back(-m_fa250Mode1Hit->samples[kk]);
 				}
