@@ -61,7 +61,7 @@ jerror_t JEventSourceBinaryDataDAQ::GetEvent(JEvent &event) {
 	//check if it was read properly
 	if (infile.eof() || infile.fail()) {
 		infile.clear();
-		if (flagEnd == 0) {
+		if (flagEnd < 2) {
 			usleep(100000);
 			flagEnd++;
 			infile.seekg(infilePos);
@@ -69,6 +69,7 @@ jerror_t JEventSourceBinaryDataDAQ::GetEvent(JEvent &event) {
 			event.SetRef(NULL);
 			return NOERROR;
 		} else {
+		  jout<<"Exiting due to end of file-1"<<endl;
 			event.SetJEventSource(this);
 			event.SetRef(NULL);
 			return NO_MORE_EVENTS_IN_SOURCE;
@@ -90,7 +91,7 @@ jerror_t JEventSourceBinaryDataDAQ::GetEvent(JEvent &event) {
 
 	if (infile.eof() || infile.fail()) {
 		infile.clear();
-		if (flagEnd == 0) {
+		if (flagEnd < 2) {
 			usleep(100000);
 			flagEnd++;
 			infile.seekg(infilePos);
@@ -98,6 +99,7 @@ jerror_t JEventSourceBinaryDataDAQ::GetEvent(JEvent &event) {
 			event.SetRef(NULL);
 			return NOERROR;
 		} else {
+		  jout<<"Exiting due to end of file-2"<<endl;
 			event.SetJEventSource(this);
 			event.SetRef(NULL);
 			return NO_MORE_EVENTS_IN_SOURCE;
