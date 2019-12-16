@@ -109,6 +109,7 @@ jerror_t JEventProcessor_monitoring::init(void) {
 
 	for (int ii=0;ii<integralTimes.size();ii++){
 		integralPlots.push_back(new TGraph());
+		integralPlots[ii]->SetTitle(Form("%f - %f",integralTimes[ii].first,integralTimes[ii].second));
 	}
 
 	japp->RootWriteLock();
@@ -243,6 +244,12 @@ jerror_t JEventProcessor_monitoring::erun(void) {
 //------------------
 jerror_t JEventProcessor_monitoring::fini(void) {
 	// Called before program exit after event processing is finished.
+
+
+
+	c_Monitor2->Print("outMonitor.pdf");
+
+
 	return NOERROR;
 }
 
