@@ -42,7 +42,8 @@ class JEventProcessor_monitoring:public jana::JEventProcessor{
 		TH1D* m_histoMonitor2;
 		TCanvas* c_Monitor;
 		TCanvas* c_Monitor2;
-
+		TCanvas* c_Monitor3;
+		
 		struct timeval startTime,thisTime;
 
 
@@ -50,7 +51,7 @@ class JEventProcessor_monitoring:public jana::JEventProcessor{
 		int nevt;
 		vector<std::pair<double,double>> integralTimes;
 		vector<TGraph *> integralPlots;
-
+		vector<TGraph *> integralPlots2;
 		int counter;
 };
 

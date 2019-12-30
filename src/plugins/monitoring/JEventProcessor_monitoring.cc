@@ -15,6 +15,7 @@ using namespace jana;
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TMultiGraph.h"
+#include "TF1.h"
 #include <fstream>
 #include <sstream>
 
@@ -58,6 +59,7 @@ JEventProcessor_monitoring::JEventProcessor_monitoring() {
 	m_histoMonitor2 = 0;
 	c_Monitor = 0;
 	c_Monitor2 = 0;
+	c_Monitor3 = 0;
 
 	jout<<"MONITOR PARMS: "<<Tmin<<" "<<Tmax<<" "<<dT<<" "<<log<<" "<<updateTime<<endl;
 
@@ -110,25 +112,33 @@ jerror_t JEventProcessor_monitoring::init(void) {
 	for (int ii=0;ii<integralTimes.size();ii++){
 		integralPlots.push_back(new TGraph());
 		integralPlots[ii]->SetTitle(Form("%f - %f",integralTimes[ii].first,integralTimes[ii].second));
+
+		integralPlots2.push_back(new TGraph());
+		integralPlots2[ii]->SetTitle(Form("%f - %f",integralTimes[ii].first,integralTimes[ii].second));
 	}
 
 	japp->RootWriteLock();
 	m_histoMonitor = new TH1D("m_histoMonitor", "m_histoMonitor", int((Tmax - Tmin) / dT), Tmin, Tmax);
 	m_histoMonitor2 = new TH1D("m_histoMonitor2", "m_histoMonitor2", int((Tmax - Tmin) / dT), Tmin, Tmax);
 	c_Monitor = new TCanvas("cMonitor", "cMonitor", 800, 800);
-	c_Monitor2 = new TCanvas("cMonitor2", "cMonitor2", 800, 800);
+	c_Monitor2 = new TCanvas("cMonitor2", "PEAK HEIGHT", 800, 800);
+	c_Monitor3 =  new TCanvas("cMonitor3", "SIGMA", 800, 800);
 
 	if (integralPlots.size()==1){
 	  c_Monitor2->Divide(1,1);
+	  c_Monitor3->Divide(1,1);
 	}
 	else if (integralPlots.size()==2){
 	  c_Monitor2->Divide(2,1);
+	  c_Monitor3->Divide(2,1);
 	} 
 	else if (integralPlots.size()<=4){
 	  c_Monitor2->Divide(2,2);
+	  c_Monitor3->Divide(2,2);
 	}
 	else if (integralPlots.size()<=9){
 	  c_Monitor2->Divide(3,3);
+	  c_Monitor3->Divide(3,3);
 	}
 	japp->RootUnLock();
 
@@ -169,6 +179,7 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 	vector<const PMTHit *> pmtHits;
 	vector<const PMTHit *>::iterator pmtHits_it;
 	const PMTHit* pmtHit;
+	TF1 *f1;
 	double intTmin,intTmax,val;
 	loop->Get(pmtHits);
 
@@ -187,16 +198,37 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 
 
 	double deltaTime =(thisTime.tv_sec-startTime.tv_sec);
+	double peak,mean,sigma;
 	if (deltaTime >= updateTime) {
 		startTime = thisTime;
 
 		if (nevt==0) return NOERROR;
 
 		for (int ii=0;ii<integralTimes.size();ii++){
-			intTmin=integralTimes[ii].first;
-			intTmax=integralTimes[ii].second;
-			val=m_histoMonitor2->Integral(m_histoMonitor2->FindBin(intTmin),m_histoMonitor2->FindBin(intTmax));
-			integralPlots[ii]->SetPoint(counter,counter*updateTime,val/nevt);
+		  intTmin=integralTimes[ii].first;
+		  intTmax=integralTimes[ii].second;
+		  val=m_histoMonitor2->Integral(m_histoMonitor2->FindBin(intTmin),m_histoMonitor2->FindBin(intTmax));
+		  if (ii<(integralTimes.size()-1)){
+		    f1=new TF1("f1","gaus",intTmin,intTmax);
+		    int result=m_histoMonitor2->Fit(f1,"RQN","",intTmin,intTmax);
+		    
+		    peak=f1->GetParameter(0);
+		    mean=f1->GetParameter(1);
+		    sigma=f1->GetParameter(2);
+		    
+		    delete f1;
+		    
+		
+		    if (result==0){
+		    integralPlots[ii]->SetPoint(counter,counter*updateTime,peak/nevt);
+		    integralPlots2[ii]->SetPoint(counter,counter*updateTime,sigma);
+		    }
+		  }
+		  else{
+		    integralPlots[ii]->SetPoint(counter,counter*updateTime,val/nevt);
+		  }
+		  
+		  
 		}
 
 		counter++;
@@ -204,12 +236,12 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 
 
 
-
-
+		m_histoMonitor2->Reset();
 		c_Monitor->cd();
 		if (log) {
 			c_Monitor->SetLogy();
 		}
+		m_histoMonitor2->Draw();
 		m_histoMonitor->Draw();
 		c_Monitor->Modified();
 		c_Monitor->Update();
@@ -220,8 +252,16 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 		}
 		c_Monitor2->Modified();
 		c_Monitor2->Update();
-		m_histoMonitor2->Reset();
 
+	        //c_Monitor3->cd();
+		for (int ii=0;ii<integralTimes.size()-1;ii++){
+			c_Monitor3->cd(ii+1);
+			integralPlots2[ii]->Draw();
+		}
+		c_Monitor3->Modified();
+		c_Monitor3->Update();
+		
+	
 
 		nevt=0;
 	}
