@@ -40,10 +40,10 @@ void InitPlugin(JApplication *app) {
 JEventProcessor_monitoring::JEventProcessor_monitoring() {
 
 	Tmin = 0;
-	Tmax = 20000;
+	Tmax = 16000;
 	dT = 4;
 	log = 0;
-	updateTime = 10;
+	updateTime = 5;
 
 
 
@@ -287,9 +287,11 @@ jerror_t JEventProcessor_monitoring::fini(void) {
 
 
 
-	c_Monitor2->Print("outMonitor.pdf");
-
-
+	c_Monitor2->Print("outMonitorPeak.pdf");
+	c_Monitor3->Print("outMonitorSigma.pdf");
+	c_Monitor2->SaveAs("outMonitorPeak.root");
+	c_Monitor3->SaveAs("outMonitorSigma.root");
+	
 	return NOERROR;
 }
 

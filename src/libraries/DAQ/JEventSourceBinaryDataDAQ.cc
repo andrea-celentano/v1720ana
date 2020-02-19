@@ -92,7 +92,7 @@ jerror_t JEventSourceBinaryDataDAQ::GetEvent(JEvent &event) {
 	if (infile.eof() || infile.fail()) {
 		infile.clear();
 		if (flagEnd < 2) {
-			usleep(100000);
+			usleep(1000000);
 			flagEnd++;
 			infile.seekg(infilePos);
 			event.SetJEventSource(this);
