@@ -9,27 +9,29 @@ FA250MODE1CALIBPEDSUB::PEDSAMPLES 20
 PMTHIT::POLARITY 1
 
 #Thresholds to define a hit, in mV. Positive values, polarity is before
-PMTHIT::THR0 50
+PMTHIT::THR0 20
 PMTHIT::THR1 50
 
 #Samples to save before the thr and after the thr
 PMTHIT::PREHIT 20
+
 PMTHIT::POSTHIT 50
 
 
 #Monitoring
 
 ##The update time in s
-MONITOR::UPDATE_TIME 2
+MONITOR::UPDATE_TIME 10
 
 ##The main histogram
-MONITOR::TMIN  1000
-MONITOR::TMAX  20000
+MONITOR::TMIN  000
+MONITOR::TMAX  16000
 MONITOR::DT    4
-MONITOR::LOG   1
+MONITOR::LOG   0
 
 ###############################
 # DO NOT TOUCH THE COMMENT    #
+
 # MONITOR_INTEGRALS           #
 # The individual integrals    # 
 # Each line is a new integral #
@@ -41,6 +43,10 @@ MONITOR::LOG   1
 # and 200 ns                  #
 ###############################
 
-INTEGRAL 0 2000
-INTEGRAL 0 1000
-INTEGRAL 1000 2000
+
+INTEGRAL 4500 5500
+INTEGRAL 6000 7000
+INTEGRAL 7500 8500
+INTEGRAL 10000 11000
+BCK 14000 16000
+#INTEGRAL 0 16000

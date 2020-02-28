@@ -52,6 +52,9 @@ class JEventProcessor_monitoring:public jana::JEventProcessor{
 		vector<std::pair<double,double>> integralTimes;
 		vector<TGraph *> integralPlots;
 		vector<TGraph *> integralPlots2;
+
+		double bckTmin,bckTmax;
+		
 		int counter;
 };
 

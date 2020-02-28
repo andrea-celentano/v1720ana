@@ -91,6 +91,10 @@ jerror_t JEventProcessor_monitoring::init(void) {
 
 	string line, word;
 	double intTmin, intTmax;
+
+	bckTmin=-1;
+	bckTmax=-1;
+	
 	while (getline(fConfig, line)) {
 		stringstream iss(line);
 
@@ -99,6 +103,10 @@ jerror_t JEventProcessor_monitoring::init(void) {
 			iss >> intTmin >> intTmax;
 			cout << "INTEGRAL: " << intTmin << " " << intTmax << endl;
 			integralTimes.push_back(make_pair(intTmin, intTmax));
+		}
+		if (word == "BCK") {
+			iss >> bckTmin >> bckTmax;
+			cout << "BCK: " << bckTmin << " " << bckTmax << endl;
 		}
 	}
 
@@ -199,17 +207,43 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 
 	double deltaTime =(thisTime.tv_sec-startTime.tv_sec);
 	double peak,mean,sigma;
+
+	double parPeak,parSigma,parMean,parBck;
+	double bckVal=0;
 	if (deltaTime >= updateTime) {
 		startTime = thisTime;
 
 		if (nevt==0) return NOERROR;
 
+		//if bckTmin>0 and bckTmax>0 comput bck
+		if ((bckTmin>0)&&(bckTmax>0)&&(bckTmax>bckTmin)){
+		  bckVal=m_histoMonitor2->Integral(m_histoMonitor2->FindBin(bckTmin),m_histoMonitor2->FindBin(bckTmax));
+		  bckVal/=(bckTmax-bckTmin);
+		}
 		for (int ii=0;ii<integralTimes.size();ii++){
 		  intTmin=integralTimes[ii].first;
 		  intTmax=integralTimes[ii].second;
 		  val=m_histoMonitor2->Integral(m_histoMonitor2->FindBin(intTmin),m_histoMonitor2->FindBin(intTmax));
+
+		  val=val-bckVal*(intTmax-intTmin);
 		  if (ii<(integralTimes.size()-1)){
-		    f1=new TF1("f1","gaus",intTmin,intTmax);
+		    f1=new TF1("f1","gaus(0)+pol0(3)",intTmin,intTmax);
+
+		    parMean=(intTmax+intTmin)/2.;
+
+		    parBck=m_histoMonitor2->GetBinContent(m_histoMonitor2->FindBin(intTmin));
+		    parBck+=m_histoMonitor2->GetBinContent(m_histoMonitor2->FindBin(intTmax));
+		    parBck/=2;
+
+		    parPeak=m_histoMonitor2->GetBinContent(m_histoMonitor2->FindBin(parMean));
+		    parPeak-=parBck;
+
+		    m_histoMonitor2->GetXaxis()->SetRangeUser(intTmin,intTmax);
+		    parSigma=m_histoMonitor2->GetRMS();
+		    m_histoMonitor2->GetXaxis()->UnZoom();
+		   
+		    
+		    f1->SetParameters(parPeak,parMean,parSigma,parBck);
 		    int result=m_histoMonitor2->Fit(f1,"RQN","",intTmin,intTmax);
 		    
 		    peak=f1->GetParameter(0);
@@ -219,18 +253,13 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 		    delete f1;
 		    
 		
-		    if (result==0){
-		    integralPlots[ii]->SetPoint(counter,counter*updateTime,peak/nevt);
-		    integralPlots2[ii]->SetPoint(counter,counter*updateTime,sigma);
+		    if ((result==0)&&(peak>0)&&(mean>intTmin)&&(mean<intTmax)){
+		      //integralPlots[ii]->SetPoint(counter,counter*updateTime,peak/nevt);
+		      integralPlots2[ii]->SetPoint(counter,counter*updateTime,sigma);
 		    }
 		  }
-		  else{
-		    integralPlots[ii]->SetPoint(counter,counter*updateTime,val/nevt);
-		  }
-		  
-		  
+		  integralPlots[ii]->SetPoint(counter,counter*updateTime,val/nevt); 
 		}
-
 		counter++;
 
 
