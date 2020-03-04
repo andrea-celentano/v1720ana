@@ -56,6 +56,7 @@ class JEventProcessor_monitoring:public jana::JEventProcessor{
 		double bckTmin,bckTmax;
 		
 		int counter;
+		vector<int> counterIndividual;
 };
 
 #endif // _JEventProcessor_monitoring_

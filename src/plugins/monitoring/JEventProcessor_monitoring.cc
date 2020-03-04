@@ -103,6 +103,7 @@ jerror_t JEventProcessor_monitoring::init(void) {
 			iss >> intTmin >> intTmax;
 			cout << "INTEGRAL: " << intTmin << " " << intTmax << endl;
 			integralTimes.push_back(make_pair(intTmin, intTmax));
+			counterIndividual.push_back(0);
 		}
 		if (word == "BCK") {
 			iss >> bckTmin >> bckTmax;
@@ -253,9 +254,10 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 		    delete f1;
 		    
 		
-		    if ((result==0)&&(peak>0)&&(mean>intTmin)&&(mean<intTmax)){
+		    if ((result==0)&&(peak>0)&&(mean>intTmin)&&(mean<intTmax)&&(sigma>0)){
 		      //integralPlots[ii]->SetPoint(counter,counter*updateTime,peak/nevt);
-		      integralPlots2[ii]->SetPoint(counter,counter*updateTime,sigma);
+		      integralPlots2[ii]->SetPoint(counterIndividual[ii],counter*updateTime,sigma);
+		      counterIndividual[ii]++;
 		    }
 		  }
 		  integralPlots[ii]->SetPoint(counter,counter*updateTime,val/nevt); 
