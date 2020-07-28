@@ -44,9 +44,13 @@ JEventProcessor_monitoring::JEventProcessor_monitoring() {
 	dT = 4;
 	log = 0;
 	updateTime = 5;
+	
+	gPARMS->GetParameter("SYSTEM:OUTPUT", optf);
+	outType.assign(optf, 0, optf.find(","));
+	outFile.assign(optf, optf.find(",") + 1, optf.size());
+	outFile.assign(outFile,0,outFile.find(".root"));
 
-
-
+	
 
 	gPARMS->SetDefaultParameter("MONITOR::TMIN", Tmin);
 	gPARMS->SetDefaultParameter("MONITOR::TMAX", Tmax);
@@ -62,7 +66,8 @@ JEventProcessor_monitoring::JEventProcessor_monitoring() {
 	c_Monitor3 = 0;
 
 	jout<<"MONITOR PARMS: "<<Tmin<<" "<<Tmax<<" "<<dT<<" "<<log<<" "<<updateTime<<endl;
-
+	jout<<"MONITOR FILES: "<<outFile<<endl;
+	
 	counter=0;
 }
 
@@ -318,10 +323,11 @@ jerror_t JEventProcessor_monitoring::fini(void) {
 
 
 
-	c_Monitor2->Print("outMonitorPeak.pdf");
-	c_Monitor3->Print("outMonitorSigma.pdf");
-	c_Monitor2->SaveAs("outMonitorPeak.root");
-	c_Monitor3->SaveAs("outMonitorSigma.root");
+  c_Monitor2->Print(Form("peak_%s.pdf",outFile.c_str()));
+  c_Monitor3->Print(Form("sigma_%s.pdf",outFile.c_str()));
+  c_Monitor2->Print(Form("peak_%s.root",outFile.c_str()));
+  c_Monitor3->Print(Form("sigma_%s.root",outFile.c_str()));
+  
 	
 	return NOERROR;
 }

@@ -12,6 +12,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <string>
 #include <sys/time.h>
 
 class TH1D;
@@ -57,6 +58,8 @@ class JEventProcessor_monitoring:public jana::JEventProcessor{
 		
 		int counter;
 		vector<int> counterIndividual;
+
+		string optf,outType,outFile;
 };
 
 #endif // _JEventProcessor_monitoring_
