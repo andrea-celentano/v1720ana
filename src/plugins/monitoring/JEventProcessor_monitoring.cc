@@ -344,6 +344,18 @@ jerror_t JEventProcessor_monitoring::fini(void) {
     f.close();
     ii++;
   }
+
+  //Print the content of the TOF spectrum
+  ofstream f(Form("%s.dat",outFile.c_str()));
+  double Time,Counts;
+  f<<Tmin<<" "<<Tmax<<" "<<dT<<endl;
+  for (int ibin=1;ibin<=m_histoMonitor->GetNbinsX();ibin++){
+    Time=m_histoMonitor->GetBinCenter(ibin);
+    Counts=m_histoMonitor->GetBinContent(ibin);
+    f<<Time<<" "<<Counts<<endl;
+  }
+  f.close();
+
   return NOERROR;
 }
 
