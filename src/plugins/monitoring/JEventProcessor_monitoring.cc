@@ -302,8 +302,7 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 		nevt=0;
 	}
 
-	usleep(10000);
-
+	
 	return NOERROR;
 }
 
