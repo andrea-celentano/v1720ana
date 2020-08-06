@@ -125,10 +125,10 @@ jerror_t JEventProcessor_monitoring::init(void) {
 
 	for (int ii=0;ii<integralTimes.size();ii++){
 		integralPlots.push_back(new TGraph());
-		integralPlots[ii]->SetTitle(Form("%f - %f",integralTimes[ii].first,integralTimes[ii].second));
+		integralPlots[ii]->SetTitle(Form("%f_%f",integralTimes[ii].first,integralTimes[ii].second));
 
 		integralPlots2.push_back(new TGraph());
-		integralPlots2[ii]->SetTitle(Form("%f - %f",integralTimes[ii].first,integralTimes[ii].second));
+		integralPlots2[ii]->SetTitle(Form("%f_%f",integralTimes[ii].first,integralTimes[ii].second));
 	}
 
 	japp->RootWriteLock();
@@ -302,6 +302,8 @@ jerror_t JEventProcessor_monitoring::evnt(JEventLoop *loop, uint64_t eventnumber
 		nevt=0;
 	}
 
+	usleep(10000);
+
 	return NOERROR;
 }
 
@@ -328,7 +330,21 @@ jerror_t JEventProcessor_monitoring::fini(void) {
   c_Monitor2->Print(Form("peak_%s.root",outFile.c_str()));
   c_Monitor3->Print(Form("sigma_%s.root",outFile.c_str()));
   
-	
-	return NOERROR;
+  //Print the content of the amplitude vs time stripchart
+  auto ii=0,jj=0,N=0;
+  double xx,yy;
+  for (auto plot : integralPlots){
+    ofstream f(Form("%s_peak_vstime_%i.dat",outFile.c_str(),ii));
+    f<<plot->GetTitle()<<endl;
+    N=plot->GetN();
+    f<<N<<endl;
+    for (jj=0;jj<N;jj++){
+      plot->GetPoint(jj,xx,yy);
+      f<<xx<<" "<<yy<<endl;
+    }
+    f.close();
+    ii++;
+  }
+  return NOERROR;
 }
 
