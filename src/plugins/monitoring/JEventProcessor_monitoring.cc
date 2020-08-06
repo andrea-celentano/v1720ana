@@ -344,7 +344,21 @@ jerror_t JEventProcessor_monitoring::fini(void) {
     f.close();
     ii++;
   }
-
+  
+  //Print the content of the sigma vs timee stripchart
+  ii=0;jj=0;N=0;
+  for (auto plot : integralPlots2){
+    ofstream f(Form("%s_sigma_vstime_%i.dat",outFile.c_str(),ii));
+    f<<plot->GetTitle()<<endl;
+    N=plot->GetN();
+    f<<N<<endl;
+    for (jj=0;jj<N;jj++){
+      plot->GetPoint(jj,xx,yy);
+      f<<xx<<" "<<yy<<endl;
+    }
+    f.close();
+    ii++;
+  }
   //Print the content of the TOF spectrum
   ofstream f(Form("%s.dat",outFile.c_str()));
   double Time,Counts;
